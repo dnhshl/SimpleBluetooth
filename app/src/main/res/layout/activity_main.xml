@@ -21,12 +21,12 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="25dp"
         android:text="gekoppelte Geräte"
-        app:layout_constraintBottom_toTopOf="@+id/buttonDiscoverDevices2"
+        app:layout_constraintBottom_toTopOf="@+id/buttonDiscoverDevices"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/buttonDiscoverDevices2"
+        android:id="@+id/buttonDiscoverDevices"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="50dp"
