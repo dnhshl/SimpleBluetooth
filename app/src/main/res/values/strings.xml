@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">SimpleBluetooth</string>
     <string name="bt_not_available">Kein Bluetooth verfügbar!</string>
+    <string name="bt_no_paired_devices">Keine gekoppelten Geräte verfügbar!</string>
 </resources>
