@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">SimpleBluetooth</string>
+    <string name="bt_not_available">Kein Bluetooth verfügbar!</string>
+</resources>
