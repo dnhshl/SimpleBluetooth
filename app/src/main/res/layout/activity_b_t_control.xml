@@ -6,6 +6,25 @@
     android:layout_height="match_parent"
     tools:context=".BTControl">
 
+    <TextView
+        android:id="@+id/textview_value_received"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="25dp"
+        app:layout_constraintBottom_toTopOf="@+id/button_data"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/button_data"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="45dp"
+        android:text="Daten Empfangen"
+        app:layout_constraintBottom_toTopOf="@id/button_led_status"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <Button
         android:id="@+id/button_led_status"
         android:layout_width="match_parent"

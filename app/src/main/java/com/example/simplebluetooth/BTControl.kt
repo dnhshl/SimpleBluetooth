@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothSocket
 import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
 import android.view.View
 import android.widget.Button
@@ -21,7 +22,11 @@ class BTControl : AppCompatActivity() {
     private lateinit var address : String
     private var isConnected = false
     private var ledIsOn = false
+    private var receivingData = false
+    private var mData = ArrayList<String>()
 
+    private val mHandler: Handler by lazy { Handler() }
+    private lateinit var mRunnable: Runnable
     private var mSocket: BluetoothSocket? = null
     private val mBluetooth: BluetoothAdapter by lazy { BluetoothAdapter.getDefaultAdapter() }
 
@@ -30,6 +35,8 @@ class BTControl : AppCompatActivity() {
     private val progress: ProgressBar by lazy{ findViewById(R.id.progress) }
     private val txtConnection: TextView by lazy{ findViewById(R.id.textview_connected_to) }
     private val btnLed: Button by lazy{ findViewById(R.id.button_led_status) }
+    private val btnData: Button by lazy{ findViewById(R.id.button_data) }
+    private val tvData: TextView by lazy{ findViewById(R.id.textview_value_received) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +59,75 @@ class BTControl : AppCompatActivity() {
                 btnLed.text = getString(R.string.led_on)
             }
         }
+
+        btnData.setOnClickListener {
+            receivingData = !receivingData
+            dataStart()
+        }
+    }
+
+    private fun dataStart() {
+        if (receivingData) {
+            btnData.text = getString(R.string.data_stop)
+            mRunnable = Runnable {
+                mHandler.postDelayed(mRunnable, 1000)
+                readBuffer()
+            }
+            mHandler.postDelayed(mRunnable, 1000)
+        } else {
+            btnData.text = getString(R.string.data_start)
+            if (mRunnable != null) {
+                mHandler.removeCallbacks(mRunnable)
+            }
+        }
+    }
+
+    private fun readBuffer() {
+        val buffer = ByteArray(2048)
+        var builder = StringBuilder()
+
+        try {
+            val mInputStream = mSocket!!.inputStream
+            val bytes = mInputStream.read(buffer)
+            val message = String(buffer, 0, bytes)
+            builder.append(message)
+            if (builder.toString().contains(":") && builder.toString().contains(";")) {
+                val msg = builder.toString()
+                val output = processString(msg, ":", true)
+                var finalOutput: Array<String>
+
+                output.forEach { string ->
+                    if (string.contains(";")) {
+                        finalOutput = processString(string, ";", false)
+
+                        finalOutput.forEach {
+                            if (it.isNotEmpty()) {
+                                mData.add(it)
+                                tvData.text = it
+                                Log.d(TAG, it)
+
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+            toast(e.localizedMessage!!)
+        }
+    }
+
+    private fun processString(msg: String, splitter: String, first: Boolean): Array<String> {
+        val m1: Array<String>
+
+        m1 = if (!msg.startsWith(":") && first) {
+            val index = msg.indexOfFirst { it == ':' }
+            val text = msg.substring(index, msg.length)
+            text.split(splitter).toTypedArray()
+        } else {
+            msg.split(splitter).toTypedArray()
+        }
+        return m1
     }
 
     private fun sendBTMessage(send: String) {
