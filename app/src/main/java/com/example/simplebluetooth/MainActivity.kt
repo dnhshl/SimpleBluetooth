@@ -10,9 +10,7 @@ import android.content.IntentFilter
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.ListView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import splitties.toast.toast
 
@@ -20,6 +18,10 @@ import splitties.toast.toast
 class MainActivity : AppCompatActivity() {
 
     private val TAG = "MainActivity"
+
+    companion object {
+        const val EXTRA_ADDRESS = "device_address"
+    }
 
     private val buttonPairedDevices : Button by lazy{ findViewById(R.id.buttonPairedDevices) }
     private val listview : ListView by lazy{ findViewById(R.id.listview) }
@@ -49,6 +51,17 @@ class MainActivity : AppCompatActivity() {
             checkBTPermission()
             getDiscoverDevices()
         }
+
+        listview.onItemClickListener = lvClickListener
+    }
+
+    private val lvClickListener = AdapterView.OnItemClickListener {
+        parent, view, position, id ->
+        val info = (view as TextView).text.toString()
+        val address = info.substring(info.length - 17)
+        val i = Intent(this@MainActivity, BTControl::class.java)
+        i.putExtra(EXTRA_ADDRESS, address)
+        startActivity(i)
     }
 
     override fun onResume() {

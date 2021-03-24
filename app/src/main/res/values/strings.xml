@@ -4,4 +4,7 @@
     <string name="bt_no_paired_devices">Keine gekoppelten Geräte verfügbar!</string>
     <string name="start_search_device">Start suche Geräte</string>
     <string name="stop_search_device">Stopp suche Geräte</string>
+    <string name="connect_failed">Connection failed</string>
+    <string name="connect_success">Connected</string>
+    <string name="connected_to">Verbunden mit %1$s</string>
 </resources>
