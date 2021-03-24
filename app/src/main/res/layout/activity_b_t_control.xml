@@ -6,6 +6,16 @@
     android:layout_height="match_parent"
     tools:context=".BTControl">
 
+    <Button
+        android:id="@+id/button_led_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="100dp"
+        android:text="LED an"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <TextView
         android:id="@+id/textview_connected_to"
         android:layout_width="match_parent"

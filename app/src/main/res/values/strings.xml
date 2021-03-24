@@ -7,4 +7,6 @@
     <string name="connect_failed">Connection failed</string>
     <string name="connect_success">Connected</string>
     <string name="connected_to">Verbunden mit %1$s</string>
+    <string name="led_on">LED AN</string>
+    <string name="led_off">LED AUS</string>
 </resources>

@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
 import splitties.toast.toast
@@ -19,6 +20,7 @@ class BTControl : AppCompatActivity() {
 
     private lateinit var address : String
     private var isConnected = false
+    private var ledIsOn = false
 
     private var mSocket: BluetoothSocket? = null
     private val mBluetooth: BluetoothAdapter by lazy { BluetoothAdapter.getDefaultAdapter() }
@@ -27,6 +29,7 @@ class BTControl : AppCompatActivity() {
 
     private val progress: ProgressBar by lazy{ findViewById(R.id.progress) }
     private val txtConnection: TextView by lazy{ findViewById(R.id.textview_connected_to) }
+    private val btnLed: Button by lazy{ findViewById(R.id.button_led_status) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,6 +42,25 @@ class BTControl : AppCompatActivity() {
 
         ConnectBT().execute()
 
+        btnLed.setOnClickListener {
+            ledIsOn = !ledIsOn
+            if (ledIsOn) {
+                sendBTMessage("H")
+                btnLed.text = getString(R.string.led_off)
+            } else {
+                sendBTMessage("L")
+                btnLed.text = getString(R.string.led_on)
+            }
+        }
+    }
+
+    private fun sendBTMessage(send: String) {
+        try {
+            mSocket!!.outputStream.write(send.toByteArray())
+        } catch (e: IOException) {
+            e.printStackTrace()
+            toast(e.localizedMessage!!)
+        }
     }
 
     private inner class ConnectBT : AsyncTask<Void, Void, Void>() {
