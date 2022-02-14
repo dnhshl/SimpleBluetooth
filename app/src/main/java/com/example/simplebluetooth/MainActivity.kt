@@ -120,6 +120,8 @@ class MainActivity : AppCompatActivity() {
             if (action == BluetoothDevice.ACTION_FOUND) {
                 val device = intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
                 val deviceInfo = """${device!!.name}${device.address}""".trimIndent()
+
+
                 Log.i(TAG, deviceInfo)
 
                 // gefundenes Gerät der Liste hinzufügen, wenn es noch nicht aufgeführt ist
