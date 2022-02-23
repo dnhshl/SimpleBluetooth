@@ -9,6 +9,8 @@
     <string name="connected_to">Verbunden mit %1$s</string>
     <string name="led_on">LED AN</string>
     <string name="led_off">LED AUS</string>
+    <string name="flashing_on">Blinken AN</string>
+    <string name="flashing_off">Blinken AUS</string>
     <string name="data_start">Daten empfangen</string>
     <string name="data_stop">Datenempfang beenden</string>
 </resources>
