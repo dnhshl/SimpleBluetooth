@@ -29,6 +29,7 @@ class  BTControl : AppCompatActivity() {
     private lateinit var value : String
     private var isConnected = false
     private var ledIsOn = false
+    private var ledFlashing = false
     private var receivingData = false
 
     private val mHandler: Handler by lazy { Handler() }
@@ -58,30 +59,42 @@ class  BTControl : AppCompatActivity() {
         ConnectBT().execute()
 
         btnBlinken.setOnClickListener {
+            ledFlashing = !ledFlashing
+            ledIsOn = false
+            btnLed.text = getString(R.string.led_on)
             val obj = JSONObject()
-            val arr = JSONArray()
-            try {
-                arr.put(0, "H")
-                arr.put(1, "L")
-                arr.put(2, "H")
-                arr.put(3, "L")
-                arr.put(4, "H")
-                arr.put(5, "L")
-
-                obj.put("array", arr)
-            }catch (e: IOException) {
-                e.printStackTrace()
-                toast(e.localizedMessage!!)
+            if(ledFlashing) {
+                try {
+                    obj.put("LEDBlinken", true)
+                    obj.put("LED", "L")
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                    toast(e.localizedMessage!!)
+                }
+                sendBTMessage("!" + obj.toString() + "!")
+                btnBlinken.text = getString(R.string.led_off)
+            }else{
+                try {
+                    obj.put("LEDBlinken", false)
+                    obj.put("LED", "L")
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                    toast(e.localizedMessage!!)
+                }
+                sendBTMessage("!" + obj.toString() + "!")
+                btnBlinken.text = getString(R.string.led_on)
             }
-            sendBTMessage("?" + obj.toString() + "?")
         }
 
         btnLed.setOnClickListener {
             ledIsOn = !ledIsOn
+            ledFlashing = false
+            btnBlinken.text = getString(R.string.led_on)
             val obj = JSONObject()
             if (ledIsOn) {
                 try {
-                    obj.put("LED", "H");
+                    obj.put("LED", "H")
+                    obj.put("LEDBlinken", false)
                 }catch (e: IOException) {
                     e.printStackTrace()
                     toast(e.localizedMessage!!)
@@ -90,7 +103,8 @@ class  BTControl : AppCompatActivity() {
                 btnLed.text = getString(R.string.led_off)
             } else {
                 try {
-                    obj.put("LED", "L");
+                    obj.put("LED", "L")
+                    obj.put("LEDBlinken", false)
                 }catch (e: IOException) {
                     e.printStackTrace()
                     toast(e.localizedMessage!!)
