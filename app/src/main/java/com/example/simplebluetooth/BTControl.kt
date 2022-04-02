@@ -18,9 +18,6 @@ import java.io.IOException
 import java.util.*
 import org.json.JSONArray
 
-
-
-
 class  BTControl : AppCompatActivity() {
 
     private val TAG = "BTControl Activity"
@@ -54,73 +51,44 @@ class  BTControl : AppCompatActivity() {
         val newint = intent
         address = newint.getStringExtra(MainActivity.EXTRA_ADDRESS).toString()
 
-        toast(address)
-
         ConnectBT().execute()
 
         btnBlinken.setOnClickListener {
             ledFlashing = !ledFlashing
-            ledIsOn = false
             btnLed.text = getString(R.string.led_on)
             val obj = JSONObject()
             if(ledFlashing) {
-                try {
-                    obj.put("LEDBlinken", true)
-                    obj.put("LED", "L")
-                } catch (e: IOException) {
-                    e.printStackTrace()
-                    toast(e.localizedMessage!!)
-                }
-                sendBTMessage("!" + obj.toString() + "!")
-                btnBlinken.text = getString(R.string.led_off)
+                obj.put("LEDBlinken", true)
+                btnBlinken.text = getString(R.string.flashing_off)
             }else{
-                try {
-                    obj.put("LEDBlinken", false)
-                    obj.put("LED", "L")
-                } catch (e: IOException) {
-                    e.printStackTrace()
-                    toast(e.localizedMessage!!)
-                }
-                sendBTMessage("!" + obj.toString() + "!")
-                btnBlinken.text = getString(R.string.led_on)
+                obj.put("LEDBlinken", false)
+                btnBlinken.text = getString(R.string.flashing_on)
             }
+            obj.put("LED", if (ledIsOn) "H" else "L")
+            sendBTMessage("!" + obj.toString() + "?")
         }
 
         btnLed.setOnClickListener {
             ledIsOn = !ledIsOn
-            ledFlashing = false
-            btnBlinken.text = getString(R.string.led_on)
             val obj = JSONObject()
             if (ledIsOn) {
-                try {
-                    obj.put("LED", "H")
-                    obj.put("LEDBlinken", false)
-                }catch (e: IOException) {
-                    e.printStackTrace()
-                    toast(e.localizedMessage!!)
-                }
-                sendBTMessage("!" + obj.toString() + "!")
+                obj.put("LED", "H")
                 btnLed.text = getString(R.string.led_off)
             } else {
-                try {
-                    obj.put("LED", "L")
-                    obj.put("LEDBlinken", false)
-                }catch (e: IOException) {
-                    e.printStackTrace()
-                    toast(e.localizedMessage!!)
-                }
-                sendBTMessage("!" + obj.toString() + "!")
+                obj.put("LED", "L")
                 btnLed.text = getString(R.string.led_on)
             }
+            obj.put("LEDBlinken", ledFlashing)
+            sendBTMessage("!" + obj.toString() + "?")
         }
 
         btnData.setOnClickListener {
             receivingData = !receivingData
-            dataStart()
+            dataStartStop()
         }
     }
 
-    private fun dataStart() {
+    private fun dataStartStop() {
         if (receivingData) {
             btnData.text = getString(R.string.data_stop)
             mRunnable = Runnable {
@@ -154,12 +122,9 @@ class  BTControl : AppCompatActivity() {
                 output.forEach { string ->
                     if (string.contains("?")) {
                         finalOutput = processString(string, "?", false)
-
-                        finalOutput.forEach {
-                            if (it.isNotEmpty()) {
-
-                                parseJSONData(it)
-
+                        finalOutput.forEach { jsonString ->
+                            if (jsonString.isNotEmpty()) {
+                                parseJSONData(jsonString)
                             }
                         }
                     }
@@ -167,7 +132,7 @@ class  BTControl : AppCompatActivity() {
             }
         } catch (e: IOException) {
             e.printStackTrace()
-            toast(e.localizedMessage!!)
+            Log.d(TAG, e.localizedMessage!!)
         }
     }
 
@@ -175,22 +140,14 @@ class  BTControl : AppCompatActivity() {
         try {
             //response String zu einem JSON Objekt
             val obj = JSONObject(jsonString)
-            //extrahieren des Objektes data
-            val dataObj = obj.getInt("poti")
-
-            tvData.text = dataObj.toString()
+            //val ledstatus = obj.getString("ledstatus")
+            tvData.text = obj.getString("ledstatus")
 
             //Array Ausgabe
-            val parentArray = obj.getJSONArray("potiArray");
-            val value1 = parentArray.getInt(0);
-            val value2 = parentArray.getInt(1);
-            val value3 = parentArray.getInt(2);
-            tvArray.text = "$value1 , $value2 , $value3"
-
-
+            val potiArray = obj.getJSONArray("potiArray")
+            tvArray.text = potiArray.toString()
         } catch (e : JSONException) {
             e.printStackTrace()
-
         }
     }
 
@@ -213,7 +170,7 @@ class  BTControl : AppCompatActivity() {
             Log.i(TAG, send.toByteArray().toHexString())
         } catch (e: IOException) {
             e.printStackTrace()
-            toast(e.localizedMessage!!)
+            Log.d(TAG, e.localizedMessage!!)
         }
     }
 
