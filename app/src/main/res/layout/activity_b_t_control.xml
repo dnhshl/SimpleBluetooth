@@ -66,7 +66,7 @@
         android:layout_height="100dp"
         android:layout_marginBottom="50dp"
         android:foregroundGravity="center"
-        android:visibility="invisible"
+        android:visibility="visible"
         app:layout_constraintBottom_toTopOf="@+id/textview_value_received"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"

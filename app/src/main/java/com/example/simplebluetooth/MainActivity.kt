@@ -9,7 +9,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import splitties.toast.toast
@@ -57,11 +56,18 @@ class MainActivity : AppCompatActivity() {
 
     private val lvClickListener = AdapterView.OnItemClickListener {
         parent, view, position, id ->
-        val info = (view as TextView).text.toString()
-        val address = info.substring(info.length - 17)
-        val i = Intent(this@MainActivity, BTControl::class.java)
-        i.putExtra(EXTRA_ADDRESS, address)
-        startActivity(i)
+            // stoppe weitere Suche
+            if (mBluetooth?.isDiscovering) {
+                mBluetooth.cancelDiscovery()
+                unregisterReceiver(mBroadcastReceiver);
+            }
+            buttonDiscoverDevices.text = getString(R.string.start_search_device);
+            // MAC Adresse des ausgewählten Devices an BTControl übergeben
+            val info = (view as TextView).text.toString()
+            val address = info.substring(info.length - 17)
+            val i = Intent(this@MainActivity, BTControl::class.java)
+            i.putExtra(EXTRA_ADDRESS, address)
+            startActivity(i)
     }
 
     override fun onResume() {

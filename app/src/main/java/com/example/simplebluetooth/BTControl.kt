@@ -55,7 +55,6 @@ class  BTControl : AppCompatActivity() {
 
         btnBlinken.setOnClickListener {
             ledFlashing = !ledFlashing
-            btnLed.text = getString(R.string.led_on)
             val obj = JSONObject()
             if(ledFlashing) {
                 obj.put("LEDBlinken", true)
@@ -84,51 +83,44 @@ class  BTControl : AppCompatActivity() {
 
         btnData.setOnClickListener {
             receivingData = !receivingData
-            dataStartStop()
+            if (receivingData) dataStart() else dataStop()
         }
     }
 
-    private fun dataStartStop() {
-        if (receivingData) {
-            btnData.text = getString(R.string.data_stop)
-            mRunnable = Runnable {
-                mHandler.postDelayed(mRunnable, 1000)
-                readBuffer()
-            }
+    private fun dataStart() {
+        if (!isConnected) return
+        if (!receivingData) return
+        btnData.text = getString(R.string.data_stop)
+        // starte Handler-Runnable zum Lesen des Buffers
+        mRunnable = Runnable {
             mHandler.postDelayed(mRunnable, 1000)
-        } else {
-            btnData.text = getString(R.string.data_start)
-            if (mRunnable != null) {
-                mHandler.removeCallbacks(mRunnable)
-            }
+            readBuffer()
         }
+        mHandler.postDelayed(mRunnable, 1000)
     }
+
+    private fun dataStop() {
+        btnData.text = getString(R.string.data_start)
+        if (mRunnable != null) mHandler.removeCallbacks(mRunnable)
+        receivingData = false
+    }
+
 
     private fun readBuffer() {
-        val buffer = ByteArray(2048)
-        var builder = StringBuilder()
-
         try {
             val mInputStream = mSocket!!.inputStream
+            val buffer = ByteArray(2048)
             val bytes = mInputStream.read(buffer)
-            val message = String(buffer, 0, bytes)
-
-            builder.append(message)
-            if (builder.toString().contains("!") && builder.toString().contains("?")) {
-                val msg = builder.toString()
-                val output = processString(msg, "!", true)
-                var finalOutput: Array<String>
-
-                output.forEach { string ->
-                    if (string.contains("?")) {
-                        finalOutput = processString(string, "?", false)
-                        finalOutput.forEach { jsonString ->
-                            if (jsonString.isNotEmpty()) {
-                                parseJSONData(jsonString)
-                            }
-                        }
-                    }
-                }
+            // buffer in String umwandeln
+            val jsonStrings = String(buffer, 0, bytes)
+            // an ! trennen
+            val singleJsonStrings = jsonStrings.split("!")
+            // jeden einzelnen getrennten String betrachten
+            singleJsonStrings.forEach { jsonstring ->
+                // Endet der String mit ?
+                if (jsonstring.endsWith("?"))
+                    // dann entferne das Fragezeichen und Werte den JSON String aus
+                    parseJSONData(jsonstring.dropLast(1))
             }
         } catch (e: IOException) {
             e.printStackTrace()
@@ -151,23 +143,10 @@ class  BTControl : AppCompatActivity() {
         }
     }
 
-    private fun processString(msg: String, splitter: String, first: Boolean): Array<String> {
-        val m1: Array<String>
-
-        m1 = if (!msg.startsWith("!") && first) {
-            val index = msg.indexOfFirst { it == '!' }
-            val text = msg.substring(index, msg.length)
-            text.split(splitter).toTypedArray()
-        } else {
-            msg.split(splitter).toTypedArray()
-        }
-        return m1
-    }
 
     private fun sendBTMessage(send: String) {
         try {
             mSocket!!.outputStream.write(send.toByteArray())
-            Log.i(TAG, send.toByteArray().toHexString())
         } catch (e: IOException) {
             e.printStackTrace()
             Log.d(TAG, e.localizedMessage!!)
@@ -213,9 +192,9 @@ class  BTControl : AppCompatActivity() {
         }
     }
 
-    fun ByteArray.toHexString() : String {
-        return this.joinToString("") {
-            java.lang.String.format("%02x", it)
-        }
+    override fun onDestroy() {
+        super.onDestroy()
+        dataStop()
+        mSocket?.close()
     }
 }
